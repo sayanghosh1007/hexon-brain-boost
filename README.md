@@ -1,3 +1,5 @@
-# Welcome to your Lovable project
+Project: Hexon AI Flashcard Generator
 
-TODO: Document your project here
+Developed by: Sayan Ghosh
+
+
