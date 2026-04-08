@@ -1,38 +1,113 @@
 import { useState } from "react";
+import { useSearchParams, Link } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Brain, CheckCircle2, XCircle, ArrowRight, Clock } from "lucide-react";
+import { Brain, CheckCircle2, XCircle, ArrowRight, Clock, BookOpen, ChevronRight } from "lucide-react";
+import { getDeck, getDecks, type Flashcard } from "@/lib/deckStore";
 
-const questions = [
-  {
-    q: "What is the time complexity of Binary Search?",
-    options: ["O(n)", "O(log n)", "O(n²)", "O(1)"],
-    correct: 1,
-    explanation: "Binary Search divides the search space in half each iteration, giving O(log n) time complexity.",
-  },
-  {
-    q: "Binary Search requires the array to be:",
-    options: ["Empty", "Sorted", "Reversed", "Randomized"],
-    correct: 1,
-    explanation: "Binary Search only works correctly on sorted arrays because it relies on the ordering to eliminate half the search space.",
-  },
-  {
-    q: "The space complexity of iterative Binary Search is:",
-    options: ["O(n)", "O(log n)", "O(n log n)", "O(1)"],
-    correct: 3,
-    explanation: "Iterative Binary Search only uses a constant number of variables regardless of input size.",
-  },
-];
+function generateQuizQuestions(cards: Flashcard[]) {
+  return cards.slice(0, 10).map((card) => {
+    const correctAnswer = card.answer.length > 80 ? card.answer.substring(0, 80) + "..." : card.answer;
+    const distractors = [
+      "This concept is not directly related to the topic at hand.",
+      "The opposite of the correct principle applies in this case.",
+      "This is a common misconception about the subject.",
+    ];
+    const options = [correctAnswer, ...distractors.slice(0, 3)];
+    // Shuffle
+    for (let i = options.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [options[i], options[j]] = [options[j], options[i]];
+    }
+    return {
+      q: card.question,
+      options,
+      correct: options.indexOf(correctAnswer),
+      explanation: card.answer,
+    };
+  });
+}
 
 const QuizPage = () => {
+  const [searchParams] = useSearchParams();
+  const deckId = searchParams.get("deck");
+
+  const deck = deckId ? getDeck(deckId) : undefined;
+  const allDecks = getDecks();
+
+  const [questions, setQuestions] = useState<ReturnType<typeof generateQuizQuestions>>([]);
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [answers, setAnswers] = useState<(number | null)[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [started, setStarted] = useState(false);
+
+  const startQuiz = (d: typeof deck) => {
+    if (!d || d.cards.length === 0) return;
+    const qs = generateQuizQuestions(d.cards);
+    setQuestions(qs);
+    setStarted(true);
+    setCurrent(0);
+    setSelected(null);
+    setAnswers([]);
+    setShowResults(false);
+  };
+
+  // Deck picker
+  if (!started) {
+    return (
+      <DashboardLayout>
+        <div className="max-w-2xl mx-auto space-y-6">
+          <div className="text-center">
+            <h1 className="text-2xl font-display font-bold mb-1">
+              <Brain className="inline mr-2 text-primary" size={28} />
+              Quiz Mode
+            </h1>
+            <p className="text-muted-foreground text-sm">Select a deck to quiz yourself.</p>
+          </div>
+
+          {allDecks.length === 0 ? (
+            <div className="glass-card p-12 text-center">
+              <BookOpen size={40} className="mx-auto mb-4 text-muted-foreground" />
+              <h3 className="font-display font-semibold mb-2">No decks available</h3>
+              <p className="text-sm text-muted-foreground mb-4">Create a deck first to take a quiz.</p>
+              <Button variant="hero" size="sm" asChild>
+                <Link to="/generate">Generate Flashcards</Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {allDecks.map((d) => (
+                <button
+                  key={d.id}
+                  onClick={() => startQuiz(d)}
+                  className="glass-card-hover p-5 w-full text-left"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Brain size={18} className="text-primary" />
+                      <div>
+                        <h3 className="font-semibold">{d.name}</h3>
+                        <p className="text-xs text-muted-foreground">{d.cards.length} cards</p>
+                      </div>
+                    </div>
+                    <ChevronRight size={18} className="text-muted-foreground" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (questions.length === 0) return null;
 
   const question = questions[current];
   const isAnswered = selected !== null;
+  const score = answers.filter((a, i) => a === questions[i].correct).length;
 
   const handleSelect = (idx: number) => {
     if (isAnswered) return;
@@ -50,32 +125,30 @@ const QuizPage = () => {
     }
   };
 
-  const score = answers.filter((a, i) => a === questions[i].correct).length;
-
   if (showResults) {
+    const finalScore = answers.filter((a, i) => a === questions[i].correct).length;
     return (
       <DashboardLayout>
-        <div className="max-w-2xl mx-auto space-y-8 text-center">
+        <div className="max-w-2xl mx-auto space-y-8 text-center animate-fade-in">
           <div className="glass-card p-10 gradient-border">
             <Brain size={48} className="mx-auto mb-4 text-primary" />
             <h1 className="text-3xl font-display font-bold mb-2">Quiz Complete!</h1>
             <p className="text-5xl font-display font-bold gradient-text my-6">
-              {score}/{questions.length}
+              {finalScore}/{questions.length}
             </p>
             <p className="text-muted-foreground mb-6">
-              {score === questions.length ? "Perfect score! 🎉" : score >= questions.length / 2 ? "Good job! Keep studying. 💪" : "Review the material and try again. 📚"}
+              {finalScore === questions.length ? "Perfect score! 🎉" : finalScore >= questions.length / 2 ? "Good job! Keep studying. 💪" : "Review the material and try again. 📚"}
             </p>
             <div className="flex justify-center gap-3">
-              <Button variant="hero" onClick={() => { setCurrent(0); setSelected(null); setAnswers([]); setShowResults(false); }}>
+              <Button variant="hero" onClick={() => startQuiz(deck || allDecks.find((d) => d.id === deckId))}>
                 Retry Quiz
               </Button>
-              <Button variant="outline" onClick={() => window.history.back()}>
-                Back to Dashboard
+              <Button variant="outline" onClick={() => setStarted(false)}>
+                Pick Another Deck
               </Button>
             </div>
           </div>
 
-          {/* Review */}
           <div className="space-y-4 text-left">
             <h2 className="font-display font-semibold text-lg">Review Answers</h2>
             {questions.map((q, i) => (
@@ -83,9 +156,9 @@ const QuizPage = () => {
                 <p className="font-semibold mb-2">{q.q}</p>
                 <p className="text-sm">
                   {answers[i] === q.correct ? (
-                    <span className="text-neon-green flex items-center gap-1"><CheckCircle2 size={14} /> Correct: {q.options[q.correct]}</span>
+                    <span className="text-neon-green flex items-center gap-1"><CheckCircle2 size={14} /> Correct</span>
                   ) : (
-                    <span className="text-destructive flex items-center gap-1"><XCircle size={14} /> Your answer: {q.options[answers[i]!]} — Correct: {q.options[q.correct]}</span>
+                    <span className="text-destructive flex items-center gap-1"><XCircle size={14} /> Incorrect</span>
                   )}
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">{q.explanation}</p>
@@ -103,7 +176,7 @@ const QuizPage = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-display font-bold">Quiz Mode</h1>
-            <p className="text-sm text-muted-foreground">Binary Search</p>
+            <p className="text-sm text-muted-foreground">{deck?.name || "Quiz"}</p>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock size={14} />
