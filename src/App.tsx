@@ -3,7 +3,16 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
+import LandingPage from "./pages/LandingPage";
+import AuthPage from "./pages/AuthPage";
+import DashboardPage from "./pages/DashboardPage";
+import GeneratePage from "./pages/GeneratePage";
+import DecksPage from "./pages/DecksPage";
+import StudyPage from "./pages/StudyPage";
+import QuizPage from "./pages/QuizPage";
+import PlannerPage from "./pages/PlannerPage";
+import LeaderboardPage from "./pages/LeaderboardPage";
+import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -15,8 +24,16 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/generate" element={<GeneratePage />} />
+          <Route path="/decks" element={<DecksPage />} />
+          <Route path="/study" element={<StudyPage />} />
+          <Route path="/quiz" element={<QuizPage />} />
+          <Route path="/planner" element={<PlannerPage />} />
+          <Route path="/leaderboard" element={<LeaderboardPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
