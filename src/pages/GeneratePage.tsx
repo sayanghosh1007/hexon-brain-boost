@@ -70,13 +70,6 @@ const GeneratePage = () => {
             <div className="space-y-4">
               <Label>Enter a Topic</Label>
               <Input placeholder="e.g., Binary Search, Photosynthesis, Python Lists..." className="bg-muted border-glass-border" />
-              <div className="flex gap-2 flex-wrap">
-                {["Binary Search", "Photosynthesis", "French Revolution", "Python Lists"].map((t) => (
-                  <button key={t} className="text-xs bg-muted px-3 py-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors">
-                    {t}
-                  </button>
-                ))}
-              </div>
             </div>
           )}
 
