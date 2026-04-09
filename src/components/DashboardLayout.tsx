@@ -4,7 +4,7 @@ import {
   LayoutDashboard,
   Brain,
   BookOpen,
-  Trophy,
+  
   User,
   LogOut,
   Sparkles,
@@ -23,7 +23,7 @@ const navItems = [
   { icon: BookOpen, label: "Study", path: "/study" },
   { icon: Brain, label: "Quiz", path: "/quiz" },
   { icon: Target, label: "Planner", path: "/planner" },
-  { icon: Trophy, label: "Leaderboard", path: "/leaderboard" },
+  
   { icon: User, label: "Profile", path: "/profile" },
 ];
 

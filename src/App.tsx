@@ -11,7 +11,7 @@ import DecksPage from "./pages/DecksPage";
 import StudyPage from "./pages/StudyPage";
 import QuizPage from "./pages/QuizPage";
 import PlannerPage from "./pages/PlannerPage";
-import LeaderboardPage from "./pages/LeaderboardPage";
+
 import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -32,7 +32,7 @@ const App = () => (
           <Route path="/study" element={<StudyPage />} />
           <Route path="/quiz" element={<QuizPage />} />
           <Route path="/planner" element={<PlannerPage />} />
-          <Route path="/leaderboard" element={<LeaderboardPage />} />
+          
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
